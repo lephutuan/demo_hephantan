@@ -97,7 +97,14 @@ public class P2PPeer {
             return;
         }
 
-        Chunk chunk = torrent.getChunks().get(chunkId);
+        Chunk chunk;
+        try {
+            chunk = torrent.getChunks().get(chunkId);
+        } catch (IndexOutOfBoundsException e) {
+            writer.println("CHUNK_NOT_FOUND");
+            return;
+        }
+        
         writer.println("CHUNK_DATA:" + chunk.getData().length + ":" + chunk.getHash());
         writer.flush();
         

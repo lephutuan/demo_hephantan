@@ -113,8 +113,7 @@ public class FileUploadService {
             throw new Exception("Download khong day du: " + downloadedChunks.size() + "/" + numChunks + " chunks");
         }
         
-        File outputFile = chunkDownloader.mergeChunks(downloadedChunks, outputPath);
-        return outputFile;
+        return chunkDownloader.mergeChunks(downloadedChunks, outputPath);
     }
     
     private int getNumChunksFromPeer(PeerInfo peer, String torrentHash) throws IOException {

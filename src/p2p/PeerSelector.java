@@ -9,6 +9,10 @@ public class PeerSelector {
     private static final double LATENCY_WEIGHT = 0.3;
     private static final double BANDWIDTH_WEIGHT = 0.4;
     private static final double LOAD_WEIGHT = 0.3;
+    
+    private static final double MAX_ACCEPTABLE_LATENCY_MS = 1000.0;
+    private static final double MAX_BANDWIDTH_MBPS = 1000.0;
+    private static final int MAX_PEER_LOAD = 10;
 
     public List<PeerInfo> selectOptimalPeers(List<PeerInfo> availablePeers, int chunkId, int maxPeers) {
         if (availablePeers == null || availablePeers.isEmpty()) {
@@ -56,12 +60,11 @@ public class PeerSelector {
             return 1.0;
         }
         
-        double maxAcceptableLatency = 1000.0;
-        if (latency >= maxAcceptableLatency) {
+        if (latency >= MAX_ACCEPTABLE_LATENCY_MS) {
             return 0.0;
         }
         
-        return 1.0 - (latency / maxAcceptableLatency);
+        return 1.0 - (latency / MAX_ACCEPTABLE_LATENCY_MS);
     }
 
     private double calculateBandwidthScore(double bandwidth) {
@@ -69,17 +72,15 @@ public class PeerSelector {
             return 0.5;
         }
         
-        double maxBandwidth = 1000.0;
-        return Math.min(bandwidth / maxBandwidth, 1.0);
+        return Math.min(bandwidth / MAX_BANDWIDTH_MBPS, 1.0);
     }
 
     private double calculateLoadScore(int currentLoad) {
-        int maxLoad = 10;
-        if (currentLoad >= maxLoad) {
+        if (currentLoad >= MAX_PEER_LOAD) {
             return 0.0;
         }
         
-        return 1.0 - ((double) currentLoad / maxLoad);
+        return 1.0 - ((double) currentLoad / MAX_PEER_LOAD);
     }
 
     public List<PeerInfo> selectPeersRoundRobin(List<PeerInfo> availablePeers, List<Integer> chunkIds) {
