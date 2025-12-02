@@ -19,14 +19,45 @@ public class SpeedComparisonService {
     }
 
     private void initializePeers() {
-        activePeers.add(new PeerInfo("127.0.0.1", 8081, "Peer-1"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8082, "Peer-2"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8083, "Peer-3"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8084, "Peer-4"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8085, "Peer-5"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8086, "Peer-6"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8087, "Peer-7"));
-        activePeers.add(new PeerInfo("127.0.0.1", 8088, "Peer-8"));
+        PeerInfo peer1 = new PeerInfo("127.0.0.1", 8081, "Peer-1");
+        peer1.setLatency(50);
+        peer1.setBandwidth(100.0);
+        activePeers.add(peer1);
+        
+        PeerInfo peer2 = new PeerInfo("127.0.0.1", 8082, "Peer-2");
+        peer2.setLatency(30);
+        peer2.setBandwidth(150.0);
+        activePeers.add(peer2);
+        
+        PeerInfo peer3 = new PeerInfo("127.0.0.1", 8083, "Peer-3");
+        peer3.setLatency(70);
+        peer3.setBandwidth(80.0);
+        activePeers.add(peer3);
+        
+        PeerInfo peer4 = new PeerInfo("127.0.0.1", 8084, "Peer-4");
+        peer4.setLatency(40);
+        peer4.setBandwidth(120.0);
+        activePeers.add(peer4);
+        
+        PeerInfo peer5 = new PeerInfo("127.0.0.1", 8085, "Peer-5");
+        peer5.setLatency(60);
+        peer5.setBandwidth(90.0);
+        activePeers.add(peer5);
+        
+        PeerInfo peer6 = new PeerInfo("127.0.0.1", 8086, "Peer-6");
+        peer6.setLatency(35);
+        peer6.setBandwidth(110.0);
+        activePeers.add(peer6);
+        
+        PeerInfo peer7 = new PeerInfo("127.0.0.1", 8087, "Peer-7");
+        peer7.setLatency(55);
+        peer7.setBandwidth(95.0);
+        activePeers.add(peer7);
+        
+        PeerInfo peer8 = new PeerInfo("127.0.0.1", 8088, "Peer-8");
+        peer8.setLatency(45);
+        peer8.setBandwidth(105.0);
+        activePeers.add(peer8);
     }
 
 

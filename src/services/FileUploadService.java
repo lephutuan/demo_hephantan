@@ -2,11 +2,14 @@ package services;
 
 import models.UploadResult;
 import models.TorrentFile;
-import p2p.P2PPeer;
+import models.PeerInfo;
+import models.Chunk;
+import p2p.*;
 
 import java.io.*;
 import java.nio.file.*;
 import java.security.MessageDigest;
+import java.util.*;
 
 public class FileUploadService {
 
@@ -14,6 +17,10 @@ public class FileUploadService {
     private final String TORRENT_DIR = "torrents/";
 
     private final double SERVER_BANDWIDTH_MBPS = 300.0;
+    
+    private final Tracker tracker;
+    private final PeerDiscovery peerDiscovery;
+    private final ChunkDownloader chunkDownloader;
 
     public FileUploadService() {
         try {
@@ -22,6 +29,10 @@ public class FileUploadService {
         } catch (IOException e) {
             System.err.println("Tao thu muc that bai: " + e.getMessage());
         }
+        
+        this.tracker = new Tracker();
+        this.peerDiscovery = new PeerDiscovery(tracker);
+        this.chunkDownloader = new ChunkDownloader(5);
     }
 
     public String getUPLOAD_DIR() {
@@ -69,9 +80,44 @@ public class FileUploadService {
 
         P2PPeer peer = new P2PPeer(8080);
         peer.startSeeding(torrent);
+        
+        PeerInfo localPeerInfo = new PeerInfo("127.0.0.1", 8080, "Seed-Peer");
+        Set<Integer> allChunks = new HashSet<>();
+        for (int i = 0; i < torrent.getNumChunks(); i++) {
+            allChunks.add(i);
+        }
+        peerDiscovery.announcePeerWithChunks(torrent.getHash(), localPeerInfo, allChunks);
 
         String message = "Upload P2P thanh cong, chia thành " + torrent.getNumChunks() + " chunk, đang seed (peers: " + numPeers + ")";
         return new UploadResult(true, message, file.length(), speedMbps);
+    }
+    
+    public File downloadP2P(String torrentHash, String outputPath) throws Exception {
+        List<PeerInfo> availablePeers = peerDiscovery.discoverPeers(torrentHash);
+        
+        if (availablePeers.isEmpty()) {
+            throw new Exception("Khong tim thay peer nao cho torrent: " + torrentHash);
+        }
+        
+        PeerInfo firstPeer = availablePeers.get(0);
+        int numChunks = getNumChunksFromPeer(firstPeer, torrentHash);
+        
+        List<Integer> chunkIds = new ArrayList<>();
+        for (int i = 0; i < numChunks; i++) {
+            chunkIds.add(i);
+        }
+        
+        List<Chunk> downloadedChunks = chunkDownloader.downloadChunksParallel(availablePeers, chunkIds, torrentHash);
+        
+        if (downloadedChunks.size() != numChunks) {
+            throw new Exception("Download khong day du: " + downloadedChunks.size() + "/" + numChunks + " chunks");
+        }
+        
+        return chunkDownloader.mergeChunks(downloadedChunks, outputPath);
+    }
+    
+    private int getNumChunksFromPeer(PeerInfo peer, String torrentHash) throws IOException {
+        return peer.getAvailableChunks().size();
     }
 
     private double calculateSpeed(long bytes, long milliseconds) {
@@ -104,5 +150,26 @@ public class FileUploadService {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+    
+    public Tracker getTracker() {
+        return tracker;
+    }
+    
+    public PeerDiscovery getPeerDiscovery() {
+        return peerDiscovery;
+    }
+    
+    public ChunkDownloader getChunkDownloader() {
+        return chunkDownloader;
+    }
+    
+    public void shutdown() {
+        if (chunkDownloader != null) {
+            chunkDownloader.shutdown();
+        }
+        if (peerDiscovery != null) {
+            peerDiscovery.shutdown();
+        }
     }
 }
