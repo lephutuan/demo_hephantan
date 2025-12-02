@@ -42,8 +42,26 @@ public class TorrentFile {
 
             while ((bytesRead = fis.read(buffer)) != -1) {
                 byte[] chunkData = Arrays.copyOf(buffer, bytesRead);
-                chunks.add(new Chunk(index++, chunkData));
+                String chunkHash = calculateChunkHash(chunkData);
+                Chunk chunk = new Chunk(index++, chunkData, chunkHash);
+                chunks.add(chunk);
             }
+        }
+    }
+
+    private String calculateChunkHash(byte[] chunkData) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(chunkData);
+            
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            System.err.println("Loi tinh hash chunk: " + e.getMessage());
+            return "";
         }
     }
 
