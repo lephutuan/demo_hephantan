@@ -1,0 +1,23 @@
+# Build directories
+build/
+dist/
+
+# NetBeans specific
+nbproject/private/
+
+# IDE specific
+.idea/
+*.iml
+.vscode/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Log files
+*.log
